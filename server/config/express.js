@@ -24,7 +24,7 @@ module.exports = function(app) {
     app.engine('ejs', require('ejs-locals'));
     app.set('view engine', 'ejs');
     app.set('views', path.resolve('./views'));
-    //app.use(session({ secret: 'epam' }));
+    app.use(session({ secret: 'epam' }));
 
     if ('production' === env) {
         app.use(morgan('dev'));
