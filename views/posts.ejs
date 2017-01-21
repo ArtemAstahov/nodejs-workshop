@@ -1,0 +1,34 @@
+<% layout('layout') -%>
+
+<!-- Page Content -->
+<br>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>Post List</h1>
+
+            <% posts.forEach(function(post) { %>
+                <div class="blog-post">
+	<h2>
+	    <a href="/posts/<%= post._id%>"><%= post.title%></a>
+	    <p class="lead">
+	        by <small><i>Name</i></small>
+	    </p>
+	    <p>
+	        <span class="glyphicon glyphicon-time"></span><%= post.date%>
+	    </p>
+	    <p>
+	        <%= post.description%>
+	    </p>
+	    <a class="btn btn-primary" href="/posts/<%= post._id%>">
+	        Read More <span class="glyphicon glyphicon-chevron-right"></span>
+	    </a>
+	    <hr>
+	</h2>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+</div>

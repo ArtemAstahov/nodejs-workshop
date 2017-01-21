@@ -1,0 +1,170 @@
+<% layout('layout') -%>
+
+<!-- Page Content -->
+<br>
+<br>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1><%=response.title %> </h1>
+
+            <div class="row">
+                <div class="col-lg-12">
+	<p class="lead pull-left">
+	    by <a href="#"><%=response.author.name%></a>
+	</p>
+	<% if (user && user._id.toString() == response.author._id.toString()) { %>
+	    <p class="lead pull-right">
+	       <a class="glyphicon glyphicon-pencil" href="/edit-post/<%=postId%>"></a>
+	       <a id="remove-post" class="glyphicon glyphicon-remove" href="#" data-post-id="<%=postId%>"></a>
+	    </p>
+	<% } %>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Date/Time -->
+            <p><span class="glyphicon glyphicon-time"></span> Posted on August 24, 2013 at 9:00 PM</p>
+
+            <hr>
+
+            <!-- Preview Image -->
+            <img class="img-responsive" src="http://placehold.it/900x300" alt="">
+
+            <hr>
+
+            <!-- Post Content -->
+            <p>
+                <%=response.description %>
+            </p>
+            <hr>
+
+            <!-- Blog Comments -->
+            <div class="comments">
+                <% response.comments.forEach(function(comment){ %>
+                <div class="media">
+	<a class="pull-left" href="#">
+	    <img class="media-object" src="http://placehold.it/64x64" alt="">
+	</a>
+	<div class="media-body">
+	    <div class="col-sm-11">
+	        <h4 class="media-heading"><%=comment.author.name%>
+	            <small><%=comment.date%></small>
+	        </h4>
+	        <p><%=comment.text%></p>
+	    </div>
+	    <% if (user && user._id.toString() == comment.author._id.toString()) { %>
+	        <div class="col-sm-1">
+	            <p class="lead">
+	                <a class="remove-comment glyphicon glyphicon-remove" href="#" data-comment-id="<%=comment._id%>"></a>
+	            </p>
+	        </div>
+	    <% } %>
+	</div>
+                </div>
+                <% }); %>
+            </div>
+            <hr>
+
+            <!-- Comments Form -->
+            <% if (user) { %>
+                <div class="well">
+	<h4>Leave a Comment:</h4>
+	<form id="comment-form" role="form" method="POST" action="/comments">
+	    <input type="hidden" name="id" value="<%=postId%>">
+	    <div class="form-group">
+	        <textarea class="form-control" name="text" rows="3"></textarea>
+	    </div>
+	    <button type="button" class="comment-form-btn btn btn-primary">Submit</button>
+	</form>
+                </div>
+            <% } %>
+        </div>
+
+    </div>
+    <!-- /.row -->
+
+    <hr>
+
+</div>
+
+<template id="post-comment">
+    <div class="media">
+        <a class="pull-left" href="#">
+            <img class="media-object" src="http://placehold.it/64x64" alt="">
+        </a>
+        <div class="media-body">
+            <div class="col-sm-11">
+                <h4 class="media-heading">
+	{{=author.name}}
+	<small>{{=date}}</small>
+                </h4>
+                <p>{{=text}}</p>
+            </div>
+            {{ if (user && user._id.toString() == author._id.toString()) { }}
+                <div class="col-sm-1">
+	<p class="lead">
+	    <a class="remove-comment glyphicon glyphicon-remove" href="#" data-comment-id="{{=_id}}"></a>
+	</p>
+                </div>
+            {{ } }}
+        </div>
+    </div>
+</template>
+<script>
+    _.templateSettings = {
+        evaluate:    /{{([\s\S]+?)}}/g,
+        interpolate: /{{=([\s\S]+?)}}/g,
+        escape:      /{{-([\s\S]+?)}}/g
+    };
+    var $commentsContainer = $('.comments');
+    var commentTemplate = _.template(_.unescape($('#post-comment').html()));
+
+    function renderComment (data, user) {
+        return commentTemplate(Object.assign({}, data, {
+            user: user
+        }));
+    }
+
+    var socket = io();
+    socket.on('addedNewComment', function (data, user) {
+        $commentsContainer.append(renderComment(data, user));
+    });
+
+    var $commentForm = $('#comment-form');
+
+    $('.comment-form-btn').on('click', function (e) {
+        e.preventDefault();
+
+        $.post('/api/comments', $commentForm.serializeArray().reduce(function (prev, current) {
+            prev[current.name] = current.value;
+            return prev;
+        }, {})).then(function () {
+            $commentForm[0].reset();
+        });
+    });
+
+    $('#remove-post').on('click', function (e) {
+        e.preventDefault();
+        var postId = $(e.target).data().postId;
+
+        $.ajax('/api/posts/' + postId, {
+            method: 'DELETE'
+        }).then(function () {
+            window.location.href = '/posts/';
+        });
+    });
+
+    $commentsContainer.on('click', '.remove-comment', function (e) {
+        e.preventDefault();
+        var commentId = $(e.target).data().commentId;
+
+        $.ajax('/api/comments/' + commentId, {
+            method: 'DELETE'
+        }).then(function () {
+            $(e.target).closest('.media').remove();
+        });
+    });
+</script>
