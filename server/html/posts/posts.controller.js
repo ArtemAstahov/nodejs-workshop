@@ -1,44 +1,37 @@
-let posts = [{
-    _id: 111,
-    title: 'my first post',
-    date: Date.now(),
-    description: 'asd asd asdasdas asd asdasdas das',
-    author: {},
-    comments: []
-}, {
-    _id: 222,
-    title: 'my first post 222',
-    date: Date.now(),
-    description: 'asd asd asdasdas asd asdasdas das '
-}, {
-    _id: 333,
-    title: 'my first post 333',
-    date: Date.now(),
-    description: 'asd asd asdasdas asd asdasdas das '
-}];
+const Post = require('./post.model');
+const PostsService = require('./posts.service');
 
 class PostController {
     constructor() {}
 
     getAllPosts(req, res) {
-        res.render('posts', {
-            posts: posts
+        PostsService.getAllPosts().then((result) => {
+            res.render('posts', {
+                posts: result
+            });
         });
     }
 
     addPost(req, res) {
-        posts.push(req.body);
-        res.render('posts', {
-            posts: posts
-        });
+        PostsService.createPost(req.body, req.user._id)
+            .then((result) => {
+                res.render('post', {
+                    status: 'success',
+                    responses: result,
+                    user: {},
+                    postId: result.id
+                });
+            });
     }
 
     getPostById(req, res) {
-        res.render('post', {
-            status: 'success',
-            response: posts[0],
-            user: req.user,
-            postId: req.params.id
+        PostsService.getPostByID(req.params.id).then((result) => {
+            res.render('post', {
+                status: 'success',
+                response: result,
+                user: {},
+                postId: req.params.id
+            });
         });
     }
 }
