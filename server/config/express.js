@@ -13,6 +13,7 @@ const errorHandler = require('errorhandler');
 const path = require('path');
 const config = require('./environment/index');
 const session = require('express-session');
+const passport = require('passport');
 
 module.exports = function(app) {
     const env = app.get('env');
@@ -25,6 +26,8 @@ module.exports = function(app) {
     app.set('view engine', 'ejs');
     app.set('views', path.resolve('./views'));
     app.use(session({ secret: 'epam' }));
+    app.use(passport.initialize());
+    app.use(passport.session());
 
     if ('production' === env) {
         app.use(morgan('dev'));

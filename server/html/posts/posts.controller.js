@@ -7,7 +7,8 @@ class PostController {
     getAllPosts(req, res) {
         PostsService.getAllPosts().then((result) => {
             res.render('posts', {
-                posts: result
+                posts: result,
+                user: req.user
             });
         });
     }
@@ -17,8 +18,8 @@ class PostController {
             .then((result) => {
                 res.render('post', {
                     status: 'success',
-                    responses: result,
-                    user: {},
+                    response: result,
+                    user: req.user,
                     postId: result.id
                 });
             });
@@ -29,7 +30,7 @@ class PostController {
             res.render('post', {
                 status: 'success',
                 response: result,
-                user: {},
+                user: req.user,
                 postId: req.params.id
             });
         });

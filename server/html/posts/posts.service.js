@@ -1,15 +1,19 @@
 const Post = require('./post.model');
 
 exports.getAllPosts = () => {
-    return Post.find({});
+    return Post.find({}).deepPopulate('author');
 };
 
 exports.getPostByID = (id) => {
-    return Post.findById(id);
+    return Post.findById(id).deepPopulate('author');
 };
 
-exports.createPost = (body) => {
-    return Post.create(body);
+exports.createPost = (body, authorId) => {
+    return Post.create(Object.assign({}, body, {
+        author: authorId
+    })).then((result) => {
+        return result;
+    });
 };
 
 exports.updatePost = (body, postId) => {
